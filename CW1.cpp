@@ -74,17 +74,56 @@ public:
     std::string getMemberId(){
         return std::to_string(memberId);
     }
+    void setBooksBorrowed(Book){
+
+    }
+
+};
+
+class Librarian: public Person{
+private:
+    int staffId;
+    int salary;
+    std::vector<Member> members;
+
+public:
+
+    Librarian(int staffID, std::string Name, std::string Address, std::string Email, int Salary){
+        setName(Name);
+        setAddress(Address);
+        setEmail(Email);
+        staffId = staffID;
+        salary = Salary;
+    };
+
+    void addMember(int memberID, std::string Name, std::string Address, std::string Email) {
+        Member newMember(memberID, Name, Address, Email);
+        members.push_back(newMember);
+    }
+
+    void setStaffID(int staffID){
+        staffId = staffID;
+    }
+
+    int getStaffID(){
+        return staffId;
+    }
+
+    void setSalary(int Salary){
+        salary = Salary;
+    }
+
+    int getSalary(){
+        return salary;
+    }
+
 };
 
 int main(){
 using std::cout;
 using std::endl;
-    Book book1(1, "mein kamf", "Adolf", "Hitler");
-    Member member1(2, "Milit", "21 blackwell place", "militdonda3@gmail.com");
 
-    book1.setDueDate(3);
-
-    cout << "Due Date: " << book1.getDueDateString() << endl;
-    cout << member1.getMemberId();
+    cout << "Welcome to the library" << endl;
+    cout << "Please select an option from below to get started" << endl;
 
 }
