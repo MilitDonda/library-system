@@ -8,12 +8,14 @@
 
 class Member;
 
+//creating a structure for Date
 struct Date{
     int day;
     int month;
     int year;
 };
 
+//function to get get from the user
 Date getDateFromUser(){
     Date inputDate;
     std::cout<<"enter date in DD MM YYYY format: " << std::endl;
@@ -32,6 +34,7 @@ Date getDateFromUser(){
     return inputDate;
 }
 
+//function to add a certain number of days to the current date
 Date addDaysToDate(Date currentDate, int daysToAdd) {
 
     const int daysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
@@ -50,6 +53,7 @@ Date addDaysToDate(Date currentDate, int daysToAdd) {
     return currentDate;
 }
 
+//function to calculate the difference between 2 dates (to calculate the fine)
 int dateDifference(const Date& date1, const Date& date2) {
     std::tm tm1 = {0, 0, 0, date1.day, date1.month - 1, date1.year - 1900};
     std::tm tm2 = {0, 0, 0, date2.day, date2.month - 1, date2.year - 1900};
@@ -63,10 +67,17 @@ int dateDifference(const Date& date1, const Date& date2) {
     return static_cast<int>(difference);
 }
 
-
 class Book{
+
+private:
+    int bookID;
+    std::string bookName, authorFirstName, authorLastName, bookType;
+    Date dueDate;
+    Member* borrower;
+    
 public:
 
+//structure to store books that have a due date to make it easier to check in borrow book and return book function
     struct BooksWithDueDate{
     int bookID;
     int memberID;
@@ -74,10 +85,6 @@ public:
     Date dueDate;
     };
 
-    int bookID;
-    std::string bookName, authorFirstName, authorLastName, bookType;
-    Date dueDate;
-    Member* borrower;
 
     Book(int bookId, std::string nameBook, std::string FirstNameAuthor, std::string LastNameAuthor){
         bookID = bookId;
@@ -341,7 +348,6 @@ Librarian librarian(1, "Milit", "21 blackwell place", "militdonda3@gmail.com", 1
         std::string Address;
         std::string Email;
         int bookID;
-        Date issueDate, DueDate;
 
         cout << "---------------------------------------------------" << endl;
         cout << "Welcome to the library" << endl;
@@ -399,6 +405,7 @@ Librarian librarian(1, "Milit", "21 blackwell place", "militdonda3@gmail.com", 1
             std::cin>> memberID;
             librarian.calculateFine(memberID);
             break;
+
             case 6:
             i = 2;
             break;
