@@ -110,18 +110,19 @@ public:
         return dueDate;
     }
 
+    bool isBorrowed;
+
     void returnBook(){
-        //code to add set the flag to true in the csv file when the book is returned
+        isBorrowed = false;
+        borrower = nullptr;
     }
 
     BooksWithDueDate bookInfo;
 
-    /*void borrowBook(Member& borrower, Date DueDate){
-        dueDate = DueDate;
-        bookInfo.memberID = borrower.getMemberIdInt();
-        bookInfo.bookID = this->bookID;
-        bookInfo.dueDate = DueDate;
-    }*/
+    void borrowBook(Member& borrower, Date dueDate){
+        this->borrower = &borrower;
+        this->dueDate = dueDate;
+    }
 };
 
 class Person{
@@ -288,13 +289,14 @@ public:
 
 void calculateFine(int memberID) {
     int totalFine = 0;
-    Date currentDate = getDateFromUser(); // Implement this to get the current date
+    std::cout<<"Enter the date of return " << std::endl;
+    Date currentDate = getDateFromUser();
 
-    for (const auto& issuedBook : issuedBooks) {
+    for (IssuedBooks issuedBook : issuedBooks) {
         if (issuedBook.memberID == memberID) {
             int daysOverdue = dateDifference(issuedBook.dueDate, currentDate);
             if (daysOverdue > 0) {
-                totalFine += daysOverdue * 1; // Assuming £1 fine per day
+                totalFine += daysOverdue * 1;
             }
         }
     }
