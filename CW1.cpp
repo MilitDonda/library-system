@@ -74,7 +74,7 @@ private:
     std::string bookName, authorFirstName, authorLastName, bookType;
     Date dueDate;
     Member* borrower;
-    
+
 public:
 
 //structure to store books that have a due date to make it easier to check in borrow book and return book function
@@ -85,7 +85,7 @@ public:
     Date dueDate;
     };
 
-
+//constructor for book object
     Book(int bookId, std::string nameBook, std::string FirstNameAuthor, std::string LastNameAuthor){
         bookID = bookId;
         bookName = nameBook;
@@ -93,32 +93,40 @@ public:
         authorLastName = LastNameAuthor;
     };
 
+//getter 
     std::string getbookID(){
         return std::to_string(bookID);
     }
 
+//getter
     std::string getbookName(){
         return bookName;
     }
 
+//getter
     std::string getAuthorFirstName(){
         return authorFirstName;
     }
 
+//getter
     std::string getAuthorLastName(){
         return authorLastName;
     }
 
+//setter
     void setDueDate(Date DueDate) {
         dueDate = DueDate;
     }
 
+//getter
     Date getDueDate(){
         return dueDate;
     }
 
+//flag to check is a book is borrowed or not
     bool isBorrowed;
 
+//return book sets flag to false i.e. book is not borrowed and the borrower pointer to null
     void returnBook(){
         isBorrowed = false;
         borrower = nullptr;
@@ -126,6 +134,7 @@ public:
 
     BooksWithDueDate bookInfo;
 
+//function to borrow books
     void borrowBook(Member& borrower, Date dueDate){
         this->borrower = &borrower;
         this->dueDate = dueDate;
@@ -137,32 +146,46 @@ private:
     std::string name, address, email;
 public:
 
+//setter
     void setName(std::string Name){
         name = Name;
     }
+
+//getter
     std::string getName(){
         return name;
     }
+
+//setter
     void setAddress(std::string Address){
         address = Address;
     }
+
+//getter
     std::string getAdrress(){
         return address;
     }
+
+//setter
     void setEmail(std::string Email){
         email = Email;
     }
+
+//getter
     std::string getEmail(){
         return email;
     }
 };
 
+//member class inheriting from person class
 class Member: public Person{
 private:
     int memberId;
     std::vector <Book> booksLoaned;
 
 public:
+
+//member constructor
     Member(int memberID, std::string Name, std::string Address, std::string Email){
         setName(Name);
         setAddress(Address);
@@ -170,10 +193,12 @@ public:
         memberId = memberID;
     }
 
+//getter
     std::string getMemberId(){
         return std::to_string(memberId);
     }
 
+//getter but without converting it to string
     int getMemberIdInt(){
         return memberId;
     }
@@ -188,6 +213,7 @@ public:
 
 };
 
+//librarian class inheriting from class person
 class Librarian: public Person{
 private:
     int staffId;
@@ -196,6 +222,7 @@ private:
 
 public:
 
+//librarian constructor
     Librarian(int staffID, std::string Name, std::string Address, std::string Email, int Salary){
         setName(Name);
         setAddress(Address);
@@ -204,6 +231,7 @@ public:
         salary = Salary;
     };
 
+//boolean function to check if a member exists 
     bool memberExists(int memberID, std::string Name, std::string Address, std::string Email){
         for(Member member : members){
             if(member.getMemberId() == std::to_string(memberID) ||
@@ -214,6 +242,7 @@ public:
        return false;
     };
 
+//function to add a member
     void addMember(int memberID, std::string Name, std::string Address, std::string Email) {
         if (!memberExists(memberID, Name, Address, Email)) {
             Member newMember(memberID, Name, Address, Email);
@@ -224,6 +253,7 @@ public:
         }
     };
 
+//function to display all the books from the csv file
     void displayLibraryBooks(){
         std::fstream myFile;
         myFile.open("library_books.csv", std::ios::in);
@@ -237,12 +267,14 @@ public:
             }
     }
 
+//structure for issued books
     struct IssuedBooks{
         int bookID;
         int memberID;
         Date dueDate;
     };
 
+//creating a vector to store issued books to late be checked against if a book is available or not
     std::vector<IssuedBooks> issuedBooks;
 
     bool isBookIssued(int bookId){
@@ -254,12 +286,14 @@ public:
         return false;
     };
 
+//function to issue a book to a certain member
     void issueBook(int memberId, int bookId){
         if (isBookIssued(bookId)) {
             std::cout << "Book is already issued." << std::endl;
         return;
     }
 
+//gets the issueDate from the user
     Date issueDate = getDateFromUser();
     Date dueDate = addDaysToDate(issueDate, 3);
     IssuedBooks newIssuedBook = {bookId, memberId, dueDate};
@@ -267,6 +301,7 @@ public:
     std::cout << "Book issued successfully." << std::endl;
 }
 
+//function to return a book
     void returnBook(int memberId, int bookId){
         for (int i = 0; i < issuedBooks.size(); ){
             if(issuedBooks[i].memberID == memberId && issuedBooks[i].bookID == bookId){
@@ -278,6 +313,7 @@ public:
         }
     }
 
+//function to display borrowed books for member
     void displayBorrowedBooks(int memberID){
         std::cout<<"Books borrowed by member " << memberID << std::endl; 
         bool hasBooksIssued = false;
@@ -294,6 +330,7 @@ public:
         }
     }
 
+//function to calculate fine
 void calculateFine(int memberID) {
     int totalFine = 0;
     std::cout<<"Enter the date of return " << std::endl;
