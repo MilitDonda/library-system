@@ -6,18 +6,84 @@
 #include <fstream>
 #include <sstream>
 
+class Member;
+
+struct Date{
+    int day;
+    int month;
+    int year;
+};
+
+Date getDateFromUser(){
+    Date inputDate;
+    std::cout<<"enter date in DD MM YYYY format: " << std::endl;
+
+    std::cout <<"DAY: ";
+    std::cin >> inputDate.day;
+
+    std::cout <<"MONTH: ";
+    std::cin >> inputDate.month; 
+
+    std::cout <<"YEAR: ";
+    std::cin >> inputDate.year;
+
+    std::cout<<"The date you issued this book is " <<inputDate.day << "/" << inputDate.month << "/" << inputDate.year << std::endl;
+
+    return inputDate;
+}
+
+Date addDaysToDate(Date currentDate, int daysToAdd) {
+
+    const int daysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    currentDate.day += daysToAdd;
+
+    while (currentDate.day > daysInMonth[currentDate.month - 1]) {
+        currentDate.day -= daysInMonth[currentDate.month - 1];
+        currentDate.month++;
+        if (currentDate.month > 12) {
+            currentDate.month = 1;
+            currentDate.year++;
+        }
+    }
+
+    return currentDate;
+}
+
+int dateDifference(const Date& date1, const Date& date2) {
+    std::tm tm1 = {0, 0, 0, date1.day, date1.month - 1, date1.year - 1900};
+    std::tm tm2 = {0, 0, 0, date2.day, date2.month - 1, date2.year - 1900};
+
+    std::time_t time1 = std::mktime(&tm1);
+    std::time_t time2 = std::mktime(&tm2);
+
+    const int secondsPerDay = 24 * 60 * 60;
+    double difference = std::difftime(time2, time1) / secondsPerDay;
+
+    return static_cast<int>(difference);
+}
+
+
 class Book{
 public:
+
+    struct BooksWithDueDate{
+    int bookID;
+    int memberID;
+    Date issueDate;
+    Date dueDate;
+    };
+
     int bookID;
     std::string bookName, authorFirstName, authorLastName, bookType;
-    std::chrono::system_clock::time_point dueDate;
+    Date dueDate;
+    Member* borrower;
 
     Book(int bookId, std::string nameBook, std::string FirstNameAuthor, std::string LastNameAuthor){
         bookID = bookId;
         bookName = nameBook;
         authorFirstName = FirstNameAuthor;
         authorLastName = LastNameAuthor;
-        dueDate = std::chrono::system_clock::now(); 
     };
 
     std::string getbookID(){
@@ -36,21 +102,25 @@ public:
         return authorLastName;
     }
 
-    void setDueDate(int days) {
-        dueDate = std::chrono::system_clock::now() + std::chrono::hours(24 * days);
+    void setDueDate(Date DueDate) {
+        dueDate = DueDate;
     }
 
-    std::string getDueDateString() const {
-        std::time_t dueTime = std::chrono::system_clock::to_time_t(dueDate);
-        return std::ctime(&dueTime);
-    } 
+    Date getDueDate(){
+        return dueDate;
+    }
 
     void returnBook(){
         //code to add set the flag to true in the csv file when the book is returned
     }
 
-    /*void borrowBook(Member borrower, int dueAfterDays){
-        //boorow book code here
+    BooksWithDueDate bookInfo;
+
+    /*void borrowBook(Member& borrower, Date DueDate){
+        dueDate = DueDate;
+        bookInfo.memberID = borrower.getMemberIdInt();
+        bookInfo.bookID = this->bookID;
+        bookInfo.dueDate = DueDate;
     }*/
 };
 
@@ -95,6 +165,11 @@ public:
     std::string getMemberId(){
         return std::to_string(memberId);
     }
+
+    int getMemberIdInt(){
+        return memberId;
+    }
+
     void setBooksBorrowed(Book){
         //code to set books borrowed goes here
     }
@@ -157,6 +232,7 @@ public:
     struct IssuedBooks{
         int bookID;
         int memberID;
+        Date dueDate;
     };
 
     std::vector<IssuedBooks> issuedBooks;
@@ -176,7 +252,9 @@ public:
         return;
     }
 
-    IssuedBooks newIssuedBook = {bookId, memberId};
+    Date issueDate = getDateFromUser();
+    Date dueDate = addDaysToDate(issueDate, 3);
+    IssuedBooks newIssuedBook = {bookId, memberId, dueDate};
     issuedBooks.push_back(newIssuedBook);
     std::cout << "Book issued successfully." << std::endl;
 }
@@ -193,14 +271,41 @@ public:
     }
 
     void displayBorrowedBooks(int memberID){
-        for (int i = 0; i < issuedBooks.size(); i++){
-            std::cout<< issuedBooks[i].bookID << std::endl;
+        std::cout<<"Books borrowed by member " << memberID << std::endl; 
+        bool hasBooksIssued = false;
+
+        for(IssuedBooks issuedBook: issuedBooks){
+            if(issuedBook.memberID == memberID){
+                std::cout<<"Book ID: " << issuedBook.bookID << std::endl;
+                hasBooksIssued = true;
+            }
+        }
+
+        if(!hasBooksIssued) {
+            std::cout<<"No books issued by this member."<< std::endl;
         }
     }
 
-    void calcFine(int memberID){
-        //code to calculate fine goes here
+void calculateFine(int memberID) {
+    int totalFine = 0;
+    Date currentDate = getDateFromUser(); // Implement this to get the current date
+
+    for (const auto& issuedBook : issuedBooks) {
+        if (issuedBook.memberID == memberID) {
+            int daysOverdue = dateDifference(issuedBook.dueDate, currentDate);
+            if (daysOverdue > 0) {
+                totalFine += daysOverdue * 1; // Assuming £1 fine per day
+            }
+        }
     }
+
+    if (totalFine > 0) {
+        std::cout << "Total fine for member " << memberID << " is £" << totalFine << std::endl;
+    } else {
+        std::cout << "No fine for member " << memberID << std::endl;
+    }
+}
+
 
     void setStaffID(int staffID){
         staffId = staffID;
@@ -234,6 +339,7 @@ Librarian librarian(1, "Milit", "21 blackwell place", "militdonda3@gmail.com", 1
         std::string Address;
         std::string Email;
         int bookID;
+        Date issueDate, DueDate;
 
         cout << "---------------------------------------------------" << endl;
         cout << "Welcome to the library" << endl;
@@ -264,9 +370,9 @@ Librarian librarian(1, "Milit", "21 blackwell place", "militdonda3@gmail.com", 1
                 cout<<"Please have a look through our collection of books and note the BookID of the book you would like to issue"<<endl;
                 cout <<endl;
                 librarian.displayLibraryBooks();
-                cout <<"enter memberID: " << endl;
+                cout <<"Enter memberID: " << endl;
                 std::cin >> memberID;
-                cout <<"enter bookID: " << endl;
+                cout <<"Enter bookID: " << endl;
                 std::cin >> bookID;
                 librarian.issueBook(memberID, bookID);
             break;
@@ -279,13 +385,17 @@ Librarian librarian(1, "Milit", "21 blackwell place", "militdonda3@gmail.com", 1
                 std::cin >> memberID;
                 librarian.returnBook(memberID, bookID);
             break;
+
             case 4:
                 cout << "Enter your memberID: " << endl;
                 std::cin >> memberID;
                 librarian.displayBorrowedBooks(memberID);
-
             break;
+
             case 5:
+            cout << "Enter you memberID: " << endl;
+            std::cin>> memberID;
+            librarian.calculateFine(memberID);
             break;
             case 6:
             i = 2;
